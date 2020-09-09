@@ -76,8 +76,7 @@ function App()
   }
 
   const handleChange = (event) => {
-          console.log(event.target.name , event.target.value);
-          const isFormValid = true ;
+          let isFormValid = true ;
           if(event.target.name === "Email"){
             isFormValid = /\S+@\S+\.\S+/.test(event.target.value);
           }
@@ -90,7 +89,7 @@ function App()
 
           if(isFormValid){
              const newUserInfo = {...user};
-             newUserInfo [event.target.name] = event.target.value;
+             newUserInfo[event.target.name] = event.target.value;
              setUser(newUserInfo);
           }
   }
@@ -108,14 +107,14 @@ function App()
         <div>
         <p>Welcome , {user.name}</p>
         <h4>Your Email: {user.email}</h4>
-        <img src ={user.photo} alt= "Your Image" style = {{width: '100px'}}></img>
+        <img src = {user.photo} alt= "Your Image" style = {{width: '100px'}}></img>
         </div>
       }
 
 
       <h1>Our own Authentication </h1>
-      <p>Email: {user.email}</p>
-      <p>Password: {user.password}</p>
+      <p>Email: {user.Email}</p>
+      <p>Password: {user.Password}</p>
       <form onSubmit = {handleSubmit}>
           <input onChange = {handleChange} type="text" name="Email" placeholder = "Your Email" required/>
           <br/>
