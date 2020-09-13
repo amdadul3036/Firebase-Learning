@@ -16,17 +16,19 @@ function App()
     isSignIn: false,
     name: "",
     email: "",
-    passowrd: "",
-    photo:""
+    password: "",
+    photo:"",
+    error: ""
   })
 
   const provider = new firebase.auth.GoogleAuthProvider();
   
   const handleSignIn = () => {
+    console.log("Handle Sign In");
     firebase.auth().signInWithPopup(provider)
     .then(function(result) {
       const {displayName , email , photoURL} = result.user;
-
+        
       const signedInUser = {
         isSignIn: true,
         name: displayName,
@@ -37,14 +39,18 @@ function App()
       setUser(signedInUser);
       console.log(displayName , email , photoURL);
       // // This gives you a Google Access Token. You can use it to access the Google API.
-      // var token = result.credential.accessToken;
+      var token = result.credential.accessToken;
       // // The signed-in user info.
-      // var user = result.user;
+      var user = result.user;
       // // ...
     }).catch(function(error) {
+      console.log("Error", error);
       // Handle Errors here.
-      var errorCode = error.code;
+      const newUserInfo = [...user];
+      newUserInfo.error = error.message;
       var errorMessage = error.message;
+      setUser(newUserInfo);
+      console.log( errorMessage);
       // The email of the user's account used.
       var email = error.email;
       // The firebase.auth.AuthCredential type that was used.
@@ -71,26 +77,50 @@ function App()
     });
   }
 
-  const handleSubmit = () =>{
+  const handleSubmit = (event) =>{
+    console.log(user.email && user.Password );
+      if(user.email && user.Password){
+        firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
+        .then (res => {
+          console.log(res);
+        })
+        .catch(function(error) {
+          console.log(error);
+          // Handle Errors here.
+          // var errorCode = error.code;
+          const newUserInfo = {...user};
+          newUserInfo.error = error.Message;
+          // var errorMessage = error.message;
+          // ...
+          // console.log(errorCode, errorMessage);
+        });
+      }
 
+      event.preventDefault();
   }
 
-  const handleChange = (event) => {
-          let isFormValid = true ;
+  const handleBlur = (event) => {
+           
+             const newUserInfo = {...user};
+             newUserInfo[event.target.name] = event.target.value;
+             setUser(newUserInfo);
+          let isFieldValid = true ;
+          
           if(event.target.name === "Email"){
-            isFormValid = /\S+@\S+\.\S+/.test(event.target.value);
+            isFieldValid = /\S+@\S+\.\S+/.test(event.target.value);
           }
 
           if(event.target.name === "Password"){
             const isPasswordValid = event.target.value.length > 6;
             const passwordHasNumber =  /\d{1}/.test(event.target.value)
-            isFormValid = isPasswordValid && passwordHasNumber;
+            isFieldValid = isPasswordValid && passwordHasNumber;
           }
 
-          if(isFormValid){
+          if(isFieldValid){
              const newUserInfo = {...user};
              newUserInfo[event.target.name] = event.target.value;
              setUser(newUserInfo);
+             console.log(newUserInfo);
           }
   }
   return (
@@ -113,15 +143,17 @@ function App()
 
 
       <h1>Our own Authentication </h1>
-      <p>Email: {user.Email}</p>
-      <p>Password: {user.Password}</p>
+      
       <form onSubmit = {handleSubmit}>
-          <input onChange = {handleChange} type="text" name="Email" placeholder = "Your Email" required/>
+          <input onBlur = {handleBlur} type="text" name="email" placeholder = "Your Email" required/>
           <br/>
-          <input onChange = {handleChange} type="password" name="Password" id="" placeholder = "Password" required/>
+          <input onBlur = {handleBlur} type="password" name="password" id="" placeholder = "Password" required/>
           <br/>
           <input type="submit" value="Submit"/>
+          <p style = {{color: 'red'}}>{user.error}</p>
       </form>
+
+        <p style = {{color:'red'}}>{user.error}</p>
     </div>
   );
 }
